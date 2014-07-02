@@ -21,12 +21,12 @@ type Service struct {
 	listener net.Listener
 }
 
-func (m *Mux) HandleSigned(path string, handler http.Handler) {
-	m.Handle(path, handlers.Signed(handler))
+func (m *Mux) HandleSigned(path string, handler http.Handler) *mux.Route {
+	return m.Handle(path, handlers.Signed(handler))
 }
 
-func (m *Mux) HandleSignedFunc(path string, f func(http.ResponseWriter, *http.Request)) {
-	m.Handle(path, handlers.Signed(http.HandlerFunc(f)))
+func (m *Mux) HandleSignedFunc(path string, f func(http.ResponseWriter, *http.Request)) *mux.Route {
+	return m.Handle(path, handlers.Signed(http.HandlerFunc(f)))
 }
 
 func (s *Service) Serve() {
