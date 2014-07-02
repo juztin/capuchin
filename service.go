@@ -35,14 +35,14 @@ func Listener() (net.Listener, error) {
 	return listeners.NewHTTP(h, p)
 }
 
-func New() *Service {
+func New(endpoint string) *Service {
 	listener, err := Listener()
 	if err != nil {
 		panic(err)
 	}
 
 	return &Service{
-		mux.NewRouter(),
+		mux.NewRouter().PathPrefix(endpoint).Subrouter(),
 		listener,
 	}
 }
