@@ -6,27 +6,14 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/stampinup/service/handlers"
 	"code.minty.io/config"
 	"code.minty.io/marbles/listeners"
 	"github.com/gorilla/mux"
 )
 
-type Mux struct {
-	*mux.Router
-}
-
 type Service struct {
-	Router   *Mux
+	Router   *mux.Router
 	listener net.Listener
-}
-
-func (m *Mux) HandleSigned(path string, handler http.Handler) *mux.Route {
-	return m.Handle(path, handlers.Signed(handler))
-}
-
-func (m *Mux) HandleSignedFunc(path string, f func(http.ResponseWriter, *http.Request)) *mux.Route {
-	return m.Handle(path, handlers.Signed(http.HandlerFunc(f)))
 }
 
 func (s *Service) Serve() {
@@ -48,16 +35,14 @@ func Listener() (net.Listener, error) {
 	return listeners.NewHTTP(h, p)
 }
 
-//func New() (*Service, error) {
 func New() *Service {
 	listener, err := Listener()
 	if err != nil {
 		panic(err)
-		//return nil, err
 	}
 
 	return &Service{
-		&Mux{mux.NewRouter()},
+		mux.NewRouter(),
 		listener,
-	} //, err
+	}
 }
