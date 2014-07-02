@@ -1,4 +1,4 @@
-package service
+package capuchin
 
 import (
 	"log"
@@ -12,12 +12,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Service struct {
+type Server struct {
 	Router   *mux.Router
 	listener net.Listener
 }
 
-func (s *Service) Serve() {
+func (s *Server) Serve() {
 	log.Printf("listening on %s", s.listener.Addr())
 	http.Serve(s.listener, s.Router)
 }
@@ -36,7 +36,7 @@ func Listener() (net.Listener, error) {
 	return listeners.NewHTTP(h, p)
 }
 
-func New(endpoint string) *Service {
+func New(endpoint string) *Server {
 	listener, err := Listener()
 	if err != nil {
 		panic(err)
@@ -51,5 +51,5 @@ func New(endpoint string) *Service {
 	ping.HandlerFunc(handlers.Ping)
 	status.Handler(handlers.SignedFunc(handlers.Status))
 
-	return &Service{router, listener}
+	return &Server{router, listener}
 }
