@@ -42,8 +42,14 @@ func New(endpoint string) *Service {
 		panic(err)
 	}
 
+	// Create the subrouter, so all additional paths are children of `endpoint`
 	router := mux.NewRouter().PathPrefix(endpoint).Subrouter()
-	router.PathPrefix("/ping").HandlerFunc(handlers.Ping)
+
+	// Add status & ping routes
+	ping := router.PathPrefix("/ping")
+	status := router.PathPrefix("/status")
+	ping.HandlerFunc(handlers.Ping)
+	status.Handler(handlers.SignedFunc(handlers.Status))
 
 	return &Service{router, listener}
 }
