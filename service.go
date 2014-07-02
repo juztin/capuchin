@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/stampinup/service/handlers"
+	"code.minty.io/capuchin/handlers"
 	"code.minty.io/config"
 	"code.minty.io/marbles/listeners"
 	"github.com/gorilla/mux"
