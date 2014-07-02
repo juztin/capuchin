@@ -10,6 +10,13 @@ import (
 
 var jobs []JobStatus
 
+// JobStatus holds information to generate status information.
+type JobStatus struct {
+	Name    string
+	Timeout time.Duration
+	Fn      func() error
+}
+
 type status struct {
 	Name     string  `json:"Endpoint"`
 	Duration float64 `json:"Duration"`
@@ -20,17 +27,13 @@ type statuses struct {
 	Endpoints []status `json:"Endpoints"`
 }
 
-type JobStatus struct {
-	Name    string
-	Timeout time.Duration
-	Fn      func() error
-}
-
+// Adds a jobs to the collection for reteiving statuses.
 func AddStatusJob(name string, timeout time.Duration, fn func() error) {
 	j := JobStatus{name, timeout, fn}
 	jobs = append(jobs, j)
 }
 
+// Status HTTP endpoint
 func Status(w http.ResponseWriter, r *http.Request) {
 	jsonxml.Write(w, r, getStatuses(jobs...))
 }

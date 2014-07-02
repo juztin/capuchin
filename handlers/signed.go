@@ -49,10 +49,12 @@ func keyFunc(expires int) hancock.KeyFunc {
 	}
 }
 
+// Wraps the handler with hancock signing.
 func Signed(h http.Handler) http.Handler {
 	return hancock.SignedHandler(h, keyFn)
 }
 
+// Wraps the func with hancock signing.
 func SignedFunc(fn func(http.ResponseWriter, *http.Request)) http.Handler {
 	return Signed(http.HandlerFunc(fn))
 }
