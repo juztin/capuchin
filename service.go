@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"bitbucket.org/stampinup/service/handlers"
 	"code.minty.io/config"
 	"code.minty.io/marbles/listeners"
 	"github.com/gorilla/mux"
@@ -41,8 +42,8 @@ func New(endpoint string) *Service {
 		panic(err)
 	}
 
-	return &Service{
-		mux.NewRouter().PathPrefix(endpoint).Subrouter(),
-		listener,
-	}
+	router := mux.NewRouter().PathPrefix(endpoint).Subrouter()
+	router.PathPrefix("/ping").HandlerFunc(handlers.Ping)
+
+	return &Service{router, listener}
 }
