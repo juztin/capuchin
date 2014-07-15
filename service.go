@@ -45,6 +45,25 @@ func Listener() (net.Listener, error) {
 	return listeners.NewHTTP(h, p)
 }
 
+func Router(endpoint string) *mux.Router {
+	router := mux.NewRouter()
+	if endpoint != "" {
+		// Create the subrouter, so all additional paths are children of `endpoint`
+		router = router.PathPrefix(endpoint).Subrouter()
+	}
+	return router
+}
+
+func NewWithListener(endpoint string, listener net.Listener) *Server {
+	router := Router(endpoint)
+	ping := router.PathPrefix("/ping")
+	status := router.PathPrefix("/status")
+	ping.HandlerFunc(handlers.Ping)
+	status.Handler(handlers.SignedFunc(handlers.Status))
+
+	return &Server{router, listener}
+}
+
 // Returns a new Server.
 func New(endpoint string) *Server {
 	listener, err := Listener()
@@ -52,9 +71,8 @@ func New(endpoint string) *Server {
 		panic(err)
 	}
 
-	// Create the subrouter, so all additional paths are children of `endpoint`
-	router := mux.NewRouter().PathPrefix(endpoint).Subrouter()
-
+	// Create the router for the endpoint.
+	router := Router(endpoint)
 	// Add status & ping routes
 	ping := router.PathPrefix("/ping")
 	status := router.PathPrefix("/status")

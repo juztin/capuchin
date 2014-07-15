@@ -10,7 +10,7 @@ import (
 
 var keyFn hancock.KeyFunc
 
-func init() {
+func Init() {
 	expires, ok := config.Int("keysExpire")
 	if !ok {
 		expires = -1
