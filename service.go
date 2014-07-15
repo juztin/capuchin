@@ -20,24 +20,25 @@ import (
 // The listener is created from settings within `config.json`.
 // The endpoints `ping` and `status` are automatically added to the mux.
 type Server struct {
+	endpoint string
 	Router   *mux.Router
 	listener net.Listener
 }
 
 // Invokes http.Serve
 func (s *Server) Serve() {
-	log.Printf("listening on %s", s.listener.Addr())
+	log.Printf("listening at %s on %s", s.endpoint, s.listener.Addr())
 	http.Serve(s.listener, s.Router)
 }
 
 // Return either a UNIX socket, or a TCP net.Listener based on `config.json`.
 func Listener() (net.Listener, error) {
 	if isSock, _ := config.GroupBool("server", "unixSock"); isSock {
-		f := config.Required.GroupString("server", "unixSockFile")
+		f := config.RequiredGroupString("server", "unixSockFile")
 		return listeners.NewSOCK(f, os.ModePerm)
 	}
 
-	p := config.Required.GroupInt("server", "port")
+	p := config.RequiredGroupInt("server", "port")
 	h, ok := config.GroupString("server", "host")
 	if !ok {
 		h = ""
@@ -56,12 +57,11 @@ func Router(endpoint string) *mux.Router {
 
 func NewWithListener(endpoint string, listener net.Listener) *Server {
 	router := Router(endpoint)
-	ping := router.PathPrefix("/ping")
-	status := router.PathPrefix("/status")
+	ping := router.PathPrefix("/ping/")
+	status := router.PathPrefix("/status/")
 	ping.HandlerFunc(handlers.Ping)
 	status.Handler(handlers.SignedFunc(handlers.Status))
-
-	return &Server{router, listener}
+	return &Server{endpoint, router, listener}
 }
 
 // Returns a new Server.
@@ -74,10 +74,9 @@ func New(endpoint string) *Server {
 	// Create the router for the endpoint.
 	router := Router(endpoint)
 	// Add status & ping routes
-	ping := router.PathPrefix("/ping")
-	status := router.PathPrefix("/status")
+	ping := router.PathPrefix("/ping/")
+	status := router.PathPrefix("/status/")
 	ping.HandlerFunc(handlers.Ping)
 	status.Handler(handlers.SignedFunc(handlers.Status))
-
-	return &Server{router, listener}
+	return &Server{endpoint, router, listener}
 }

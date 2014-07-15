@@ -8,14 +8,14 @@ import (
 	"code.minty.io/hancock"
 )
 
-var keyFn hancock.KeyFunc
+var KeyFn hancock.KeyFunc
 
 func Init() {
 	expires, ok := config.Int("keysExpire")
 	if !ok {
 		expires = -1
 	}
-	keyFn = keyFunc(expires)
+	KeyFn = KeyFunc(expires)
 }
 
 func apiKeys() map[string]string {
@@ -38,7 +38,7 @@ func apiKeys() map[string]string {
 	return keys
 }
 
-func keyFunc(expires int) hancock.KeyFunc {
+func KeyFunc(expires int) hancock.KeyFunc {
 	keys := apiKeys()
 	return func(key string) (string, int) {
 		pKey, ok := keys[key]
@@ -51,7 +51,7 @@ func keyFunc(expires int) hancock.KeyFunc {
 
 // Wraps the handler with hancock signing.
 func Signed(h http.Handler) http.Handler {
-	return hancock.SignedHandler(h, keyFn)
+	return hancock.SignedHandler(h, KeyFn)
 }
 
 // Wraps the func with hancock signing.
