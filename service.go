@@ -59,8 +59,8 @@ func NewWithListener(endpoint string, listener net.Listener) *Server {
 	router := Router(endpoint)
 	ping := router.PathPrefix("/ping/")
 	status := router.PathPrefix("/status/")
-	ping.HandlerFunc(handlers.Ping)
-	status.Handler(handlers.SignedFunc(handlers.Status))
+	ping.Handler(handlers.RecoveryFunc(handlers.Ping))
+	status.Handler(handlers.Recovery(handlers.SignedFunc(handlers.Status)))
 	return &Server{endpoint, router, listener}
 }
 
@@ -76,7 +76,7 @@ func New(endpoint string) *Server {
 	// Add status & ping routes
 	ping := router.PathPrefix("/ping/")
 	status := router.PathPrefix("/status/")
-	ping.HandlerFunc(handlers.Ping)
-	status.Handler(handlers.SignedFunc(handlers.Status))
+	ping.Handler(handlers.RecoveryFunc(handlers.Ping))
+	status.Handler(handlers.Recovery(handlers.SignedFunc(handlers.Status)))
 	return &Server{endpoint, router, listener}
 }
