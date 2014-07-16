@@ -29,8 +29,6 @@ func (h *Recover) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err := recover(); err != nil {
 			w.WriteHeader(500)
 
-			//errMsg := fmt.Sprintf("%s", err)
-			//buf := bytes.NewBuffer([]byte(errMsg))
 			var buf bytes.Buffer
 			buf.WriteString(fmt.Sprintf("%s", err))
 			for i := 1; ; i++ {
