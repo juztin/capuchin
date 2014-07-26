@@ -53,9 +53,19 @@ func KeyFunc(expires int) hancock.KeyFunc {
 	}
 }
 
+// Wraps the handler with hancock signing, using the given LogFunc to pass validation errors to.
+func SignedLog(h http.Handler, fn hancock.LogFunc) http.Handler {
+	return hancock.SignedHandler(h, KeyFn, fn)
+}
+
+// Wraps the func with hancock signing, using the given LogFunc to pass validation errors to.
+func SignedLogFunc(fn func(http.ResponseWriter, *http.Request), logFn hancock.LogFunc) http.Handler {
+	return SignedLog(http.HandlerFunc(fn), logFn)
+}
+
 // Wraps the handler with hancock signing.
 func Signed(h http.Handler) http.Handler {
-	return hancock.SignedHandler(h, KeyFn)
+	return SignedLog(h, log.Println)
 }
 
 // Wraps the func with hancock signing.
