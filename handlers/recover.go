@@ -32,10 +32,10 @@ func (h *Recover) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			var buf bytes.Buffer
 			buf.WriteString(fmt.Sprintf("%s", err))
 			for i := 1; ; i++ {
-				if _, f, l, ok := runtime.Caller(i); !ok {
+				if pc, file, line, ok := runtime.Caller(i); !ok {
 					break
 				} else {
-					buf.WriteString(fmt.Sprintf("Line: %d\nfile: %s\n-\n", l, f))
+					fmt.Fprintf(&buf, "%s:%d (0x%x)\n", file, line, pc)
 				}
 			}
 			if err := Log(buf.String()); err != nil {
