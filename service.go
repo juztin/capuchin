@@ -31,6 +31,22 @@ func (s *Server) Serve() {
 	http.Serve(s.listener, s.Router)
 }
 
+// Adds defaults routes, ping and status.
+func addRoutes(r *mux.Router) {
+	ping := handlers.RecoveryFunc(handlers.Ping)
+	status := handlers.Recovery(handlers.SignedFunc(handlers.Status))
+	r.Handle("/status/", status).Methods("GET")
+	r.Handle("/ping/", ping).Methods("GET")
+}
+
+// Returns a new gorilla Router for the given endpoint, with ping and status routes added.
+func newRouter(endpoint string) *mux.Router {
+	r := Router(endpoint)
+	r.StrictSlash(true)
+	addRoutes(r)
+	return r
+}
+
 // Return either a UNIX socket, or a TCP net.Listener based on `config.json`.
 func Listener() (net.Listener, error) {
 	if isSock, _ := config.GroupBool("server", "unixSock"); isSock {
@@ -55,28 +71,18 @@ func Router(endpoint string) *mux.Router {
 	return router
 }
 
-func NewWithListener(endpoint string, listener net.Listener) *Server {
-	router := Router(endpoint)
-	ping := router.PathPrefix("/ping/")
-	status := router.PathPrefix("/status/")
-	ping.Handler(handlers.RecoveryFunc(handlers.Ping))
-	status.Handler(handlers.Recovery(handlers.SignedFunc(handlers.Status)))
-	return &Server{endpoint, router, listener}
-}
-
-// Returns a new Server.
+// Returns a new Server, handling routes at the given endpoint.
 func New(endpoint string) *Server {
 	listener, err := Listener()
 	if err != nil {
 		panic(err)
 	}
+	router := newRouter(endpoint)
+	return &Server{endpoint, router, listener}
+}
 
-	// Create the router for the endpoint.
-	router := Router(endpoint)
-	// Add status & ping routes
-	ping := router.PathPrefix("/ping/")
-	status := router.PathPrefix("/status/")
-	ping.Handler(handlers.RecoveryFunc(handlers.Ping))
-	status.Handler(handlers.Recovery(handlers.SignedFunc(handlers.Status)))
+// Same as New, using the given net.Listener.
+func NewWithListener(endpoint string, listener net.Listener) *Server {
+	router := newRouter(endpoint)
 	return &Server{endpoint, router, listener}
 }
