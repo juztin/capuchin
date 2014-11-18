@@ -34,9 +34,11 @@ func (s *Server) Serve() {
 // Adds defaults routes, ping and status.
 func addRoutes(r *mux.Router) {
 	ping := handlers.RecoveryFunc(handlers.Ping)
+	time := handlers.RecoveryFunc(handlers.Time)
 	status := handlers.Recovery(handlers.SignedFunc(handlers.Status))
 	r.Handle("/status/", status).Methods("GET")
 	r.Handle("/ping/", ping).Methods("GET")
+	r.Handle("/time/", time).Methods("GET")
 }
 
 // Returns a new gorilla Router for the given endpoint, with ping and status routes added.
