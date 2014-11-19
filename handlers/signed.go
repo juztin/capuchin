@@ -45,9 +45,14 @@ func apiKeys() map[string]string {
 func KeyFunc(expires int) hancock.KeyFunc {
 	keys := apiKeys()
 	return func(key string) (string, int) {
+		if expires == -2 {
+			return "ignore", expires
+		} else if key == "" {
+			return "empty", expires
+		}
 		pKey, ok := keys[key]
-		if !ok && expires == -2 {
-			pKey = "ignore"
+		if !ok {
+			return "missing", expires
 		}
 		return pKey, expires
 	}
