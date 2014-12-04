@@ -85,7 +85,7 @@ func statusFor(name string, timeout time.Duration, fn func() error) status {
 	select {
 	case err := <-c:
 		return newStatus(name, start, err)
-	case <-time.After(timeout * time.Second):
+	case <-time.After(timeout):
 		return newStatus(name, start, fmt.Errorf("timeout exceeded"))
 	}
 }
