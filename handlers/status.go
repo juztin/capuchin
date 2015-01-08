@@ -22,13 +22,13 @@ type JobStatus struct {
 }
 
 type status struct {
-	Name     string  `json:"Endpoint"`
-	Duration float64 `json:"Duration"`
-	Error    string  `json:"Error,omitempty"`
+	Name     string  `json:"endpoint"`
+	Duration float64 `json:"duration"`
+	Error    string  `json:"error,omitempty"`
 }
 
 type statuses struct {
-	Endpoints []status `json:"Endpoints"`
+	Endpoints []status `json:"endpoints"`
 }
 
 // Adds a jobs to the collection for reteiving statuses.
