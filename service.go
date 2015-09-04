@@ -1,4 +1,4 @@
-// Copyright 2014 Justin Wilson. All rights reserved.
+// Copyright 2015 Justin Wilson. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,11 +9,16 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 
 	"code.minty.io/capuchin/handlers"
-	"code.minty.io/config"
 	"code.minty.io/marbles/listeners"
 	"github.com/gorilla/mux"
+)
+
+const (
+	DEFAULT_PORT = 9000
+	DEFAULT_HOST = "127.0.0.1"
 )
 
 // A wrapper around gorilla.mux and net.listener.
@@ -35,7 +40,7 @@ func (s *Server) Serve() {
 func addRoutes(r *mux.Router) {
 	ping := handlers.RecoveryFunc(handlers.Ping)
 	time := handlers.RecoveryFunc(handlers.Time)
-	status := handlers.Recovery(handlers.SignedFunc(handlers.Status))
+	status := handlers.RecoveryFunc(handlers.Status)
 	r.Handle("/status/", status).Methods("GET")
 	r.Handle("/ping/", ping).Methods("GET")
 	r.Handle("/time/", time).Methods("GET")
@@ -51,17 +56,20 @@ func newRouter(endpoint string) *mux.Router {
 
 // Return either a UNIX socket, or a TCP net.Listener based on `config.json`.
 func Listener() (net.Listener, error) {
-	if isSock, _ := config.GroupBool("server", "unixSock"); isSock {
-		f := config.RequiredGroupString("server", "unixSockFile")
+	h := os.Getenv("SERVICE_HOST")
+	p := os.Getenv("SERVICE_PORT")
+	f := os.Getenv("SERVICE_SOCK_FILE")
+	if f != "" {
 		return listeners.NewSOCK(f, os.ModePerm)
 	}
-
-	p := config.RequiredGroupInt("server", "port")
-	h, ok := config.GroupString("server", "host")
-	if !ok {
-		h = ""
+	if h == "" {
+		h = DEFAULT_HOST
 	}
-	return listeners.NewHTTP(h, p)
+	port, err := strconv.Atoi(p)
+	if err != nil {
+		port = DEFAULT_PORT
+	}
+	return listeners.NewHTTP(h, port)
 }
 
 func Router(endpoint string) *mux.Router {
